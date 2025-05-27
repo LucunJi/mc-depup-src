@@ -1,4 +1,4 @@
-import * as network from "../../src/network/minecraft"
+import * as network from '../../src/network/minecraft'
 
 describe('fetchLatestVersions', () => {
     it('normal', async () => {

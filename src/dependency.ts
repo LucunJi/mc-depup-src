@@ -6,25 +6,27 @@ import * as yml from 'yaml'
 import { promises as fs } from 'fs'
 import { typeOf } from './utils'
 import { DependencyVersion } from './version'
-import { PatternContext, PatternPart, parsePattern, isWildcardNameContextual } from './pattern'
-
+import {
+    PatternContext,
+    PatternPart,
+    parsePattern,
+    isWildcardNameContextual
+} from './pattern'
 
 export type Property = {
     name: string
-    source: 'version'
-    | 'artifactId'
-    | 'wildcard'
+    source: 'version' | 'artifactId' | 'wildcard'
     wildcardName?: string
 }
 const VALID_PROPERTY_SOURCES: Property['source'][] = [
-    'version', 'artifactId', 'wildcard'
+    'version',
+    'artifactId',
+    'wildcard'
 ]
-
 
 export type DependencyContext = PatternContext & {
     omitMcPatch: boolean
 }
-
 
 export class DependencySettings {
     readonly dependencies: Dependency[]
@@ -49,18 +51,19 @@ export class Dependency {
         readonly groupId: string,
         readonly artifactId: PatternPart[],
         readonly version: PatternPart[],
-        readonly properties: Map<string, Property>,
+        readonly properties: Map<string, Property>
     ) {
         this.versionCaptureTypes = []
         for (const part of version) {
-            if (part.hasCaptureGroup)
-                this.versionCaptureTypes.push(part.type)
+            if (part.hasCaptureGroup) this.versionCaptureTypes.push(part.type)
         }
     }
 
     contextualize(context: DependencyContext): ContextualizedDependency {
-        const artifactId = this.artifactId.map(part => part.contextualize(context, false)).join('')
-        const version = `^${this.version.map(part => part.contextualize(context, true)).join('')}$`
+        const artifactId = this.artifactId
+            .map((part) => part.contextualize(context, false))
+            .join('')
+        const version = `^${this.version.map((part) => part.contextualize(context, true)).join('')}$`
         const versionRegExp = new RegExp(version)
         return new ContextualizedDependency(
             this,
@@ -78,7 +81,8 @@ export class Dependency {
         let joined = ''
         for (let i = 0; i < this.versionCaptureTypes.length; ++i) {
             switch (this.versionCaptureTypes[i]) {
-                case 'wildcard': case 'named_wildcard':
+                case 'wildcard':
+                case 'named_wildcard':
                     joined += '-'
                     joined += captures[i]
                     break
@@ -94,21 +98,22 @@ export class ContextualizedDependency {
         readonly repository: string,
         readonly groupId: string,
         readonly artifactId: string,
-        readonly version: RegExp,
-    ) { }
+        readonly version: RegExp
+    ) {}
 }
 
 function checkArtifactIdParts(artifactId: PatternPart[]): void {
     for (const part of artifactId) {
         if (!(part.type === 'literal' || part.type === 'contextual_wildcard'))
-            throw new Error('artifactId can only contain literals or wildcards of Minecraft version')
+            throw new Error(
+                'artifactId can only contain literals or wildcards of Minecraft version'
+            )
     }
 }
 
 function parseDependencies(input: string): Dependency[] {
     const doc = yml.parse(input)
-    if (!Array.isArray(doc))
-        throw new Error('Settings must be an array')
+    if (!Array.isArray(doc)) throw new Error('Settings must be an array')
 
     const ret: Dependency[] = []
     for (const entry of doc) {
@@ -123,11 +128,13 @@ function parseDependencies(input: string): Dependency[] {
             ['groupId', 'string'],
             ['artifactId', 'string'],
             ['version', 'string'],
-            ['properties', 'object'],
+            ['properties', 'object']
         ]) {
             const actualType = typeOf(entry[key])
             if (actualType !== expectedType)
-                throw new Error(`${key} must exist as a ${expectedType}, but it is actually ${actualType}`)
+                throw new Error(
+                    `${key} must exist as a ${expectedType}, but it is actually ${actualType}`
+                )
         }
 
         const parsedArtifactId = parsePattern(artifactId)
@@ -146,19 +153,30 @@ function parseDependencies(input: string): Dependency[] {
         //     }
         // }
         const namedWildcardNames = new Set<string>(
-            parsedVersion.filter(part => part.type === 'named_wildcard').map(part => part.value)
+            parsedVersion
+                .filter((part) => part.type === 'named_wildcard')
+                .map((part) => part.value)
         )
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        for (const [propertyName, propertyAttrs] of Object.entries<any>(properties)) {
+        for (const [propertyName, propertyAttrs] of Object.entries<any>(
+            properties
+        )) {
             const source = propertyAttrs['source']
             if (!VALID_PROPERTY_SOURCES.includes(source)) {
-                throw new Error(`The source of property '${propertyName}' must be one of ${VALID_PROPERTY_SOURCES.join(', ')}`)
+                throw new Error(
+                    `The source of property '${propertyName}' must be one of ${VALID_PROPERTY_SOURCES.join(', ')}`
+                )
             }
 
             if (source === 'wildcard') {
                 const wildcardName = propertyAttrs['name'] ?? propertyName
-                if (!namedWildcardNames.has(wildcardName) && !isWildcardNameContextual(wildcardName)) {
-                    throw new Error(`To give '${propertyName}' a wildcard source, a wildcard with name '${wildcardName}' must exist in the pattern of version`)
+                if (
+                    !namedWildcardNames.has(wildcardName) &&
+                    !isWildcardNameContextual(wildcardName)
+                ) {
+                    throw new Error(
+                        `To give '${propertyName}' a wildcard source, a wildcard with name '${wildcardName}' must exist in the pattern of version`
+                    )
                 }
                 actualProperties.set(propertyName, {
                     name: propertyName,
@@ -173,13 +191,15 @@ function parseDependencies(input: string): Dependency[] {
             }
         }
 
-        ret.push(new Dependency(
-            repository as string,
-            groupId as string,
-            parsedArtifactId,
-            parsedVersion,
-            actualProperties
-        ))
+        ret.push(
+            new Dependency(
+                repository as string,
+                groupId as string,
+                parsedArtifactId,
+                parsedVersion,
+                actualProperties
+            )
+        )
     }
 
     return ret

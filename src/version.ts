@@ -9,7 +9,7 @@ export class McVersion {
         readonly major: number,
         readonly minor: number,
         readonly patch: number
-    ) { }
+    ) {}
 
     static fromString(version: string): McVersion {
         const parts = version.split('.')
@@ -22,8 +22,7 @@ export class McVersion {
 
     toString(full = false): string {
         let ret = `${this.major}.${this.minor}`
-        if (this.patch > 0 || full)
-            ret += `.${this.patch}`
+        if (this.patch > 0 || full) ret += `.${this.patch}`
         return ret
     }
 
@@ -58,7 +57,8 @@ export class DependencyVersion {
 
     constructor(versionStr: string) {
         for (const match of versionStr.trim().matchAll(VERSION_PART)) {
-            if (match[1] !== undefined) {  // numerical part
+            if (match[1] !== undefined) {
+                // numerical part
                 this.parts.push(parseInt(match[1]))
             } else {
                 this.parts.push(match[2])
@@ -70,21 +70,31 @@ export class DependencyVersion {
      * See: https://docs.gradle.org/current/userguide/single_versions.html#version_ordering
      */
     compare(other: DependencyVersion): number {
-        for (let i = 0; this.parts[i] !== undefined || other.parts[i] !== undefined; ++i) {
-            const x = this.parts[i]; const y = other.parts[i]
-            const xIsString = isString(x); const yIsString = isString(y)
+        for (
+            let i = 0;
+            this.parts[i] !== undefined || other.parts[i] !== undefined;
+            ++i
+        ) {
+            const x = this.parts[i]
+            const y = other.parts[i]
+            const xIsString = isString(x)
+            const yIsString = isString(y)
             // being undefined means the index is out of range in a versioning with less parts
-            const xIsUndef = x === undefined; const yIsUndef = y === undefined
-            const xIsNumber = !xIsString && !xIsUndef; const yIsNumber = !yIsString && !yIsUndef
+            const xIsUndef = x === undefined
+            const yIsUndef = y === undefined
+            const xIsNumber = !xIsString && !xIsUndef
+            const yIsNumber = !yIsString && !yIsUndef
 
             let cmp: number
             if (xIsNumber && yIsNumber) {
                 cmp = (x as number) - (y as number)
-            } else if (xIsNumber) {  // numeric > letters or empty
+            } else if (xIsNumber) {
+                // numeric > letters or empty
                 cmp = 1
             } else if (yIsNumber) {
                 cmp = -1
-            } else if (xIsString && yIsString) {  // from this point, none of x and y can be numerical
+            } else if (xIsString && yIsString) {
+                // from this point, none of x and y can be numerical
                 const xRank = SPECIALS.indexOf((x as string).toLowerCase())
                 const yRank = SPECIALS.indexOf((y as string).toLowerCase())
                 if (xRank !== -1 && yRank !== -1) {
@@ -93,12 +103,15 @@ export class DependencyVersion {
                     cmp = xRank === 0 ? -1 : 1
                 } else if (yRank !== -1) {
                     cmp = yRank === 0 ? 1 : -1
-                } else {  // both are non-special
+                } else {
+                    // both are non-special
                     cmp = compareStringLexigraphically(x as string, y as string)
                 }
-            } else if (xIsString) {  // y is undefined here, and letters are smaller than empty
+            } else if (xIsString) {
+                // y is undefined here, and letters are smaller than empty
                 cmp = -1
-            } else {  // x and y can't be both undefined
+            } else {
+                // x and y can't be both undefined
                 cmp = 1
             }
 
@@ -110,7 +123,8 @@ export class DependencyVersion {
 
 function compareStringLexigraphically(x: string, y: string): number {
     for (let j = 0; j < x.length || j < y.length; ++j) {
-        const cx = x.charCodeAt(j); const cy = y.charCodeAt(j)
+        const cx = x.charCodeAt(j)
+        const cy = y.charCodeAt(j)
         if (Number.isNaN(cx)) {
             return -1
         } else if (Number.isNaN(cy)) {
