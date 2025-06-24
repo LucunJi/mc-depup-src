@@ -33,7 +33,7 @@
   properties:
     malilib_minecraft_version:
       source: wildcard
-      name: mcVersion
+      wildcardName: mcVersion
     malilib_version:
       source: version
 

@@ -63,6 +63,7 @@ so they form a list:
   properties: <a map telling MC-DepUp what project properties to update>
     "<property name in gradle.properties>":
       source: "<the source of its value>"
+      wildcardName: "<optional. the name of the wildcard, used when it's different from property name>"
 ```
 
 You also need to have `minecraft_version` in your `gradle.properties`,
@@ -72,6 +73,7 @@ The source of value for any property could be one of these:
 
 - `artifactId`/`version`: the entire matched artifactId/version string
 - `wildcard`: the wildcard with the same name as the wildcard in the bracket
+  - You can optionally use `wildcardName` when the wildcard's name is different from property name
 
 
 ### Wildcards
@@ -292,7 +294,7 @@ You can uncomment it after adding additional steps in to handle that.
   properties:
     malilib_minecraft_version:
       source: wildcard
-      name: mcVersion
+      wildcardName: mcVersion
     malilib_version:
       source: version
 ```
@@ -312,7 +314,7 @@ You can uncomment it after adding additional steps in to handle that.
   properties:
     geckolib_minecraft_version:
       source: wildcard
-      name: mcVersion
+      wildcardName: mcVersion
     geckolib_version:
       source: version
 ```

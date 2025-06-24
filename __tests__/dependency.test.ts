@@ -148,7 +148,7 @@ describe('DependencySettings.constructor', () => {
       source: wildcard
     fabric_minecraft_version:
       source: wildcard
-      name: mcVersion
+      wildcardName: mcVersion
 `)
         expect(actual).toEqual(
             expect.objectContaining({
@@ -206,7 +206,7 @@ describe('DependencySettings.constructor', () => {
   properties:
     malilib_minecraft_version:
       source: wildcard
-      name: mcVersion
+      wildcardName: mcVersion
     malilib_version:
       source: wildcard
 `)

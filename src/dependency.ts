@@ -169,7 +169,7 @@ function parseDependencies(input: string): Dependency[] {
             }
 
             if (source === 'wildcard') {
-                const wildcardName = propertyAttrs['name'] ?? propertyName
+                const wildcardName = propertyAttrs['wildcardName'] ?? propertyName
                 if (
                     !namedWildcardNames.has(wildcardName) &&
                     !isWildcardNameContextual(wildcardName)

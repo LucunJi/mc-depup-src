@@ -36321,7 +36321,7 @@ function parseDependencies(input) {
                 throw new Error(`The source of property '${propertyName}' must be one of ${VALID_PROPERTY_SOURCES.join(', ')}`);
             }
             if (source === 'wildcard') {
-                const wildcardName = propertyAttrs['name'] ?? propertyName;
+                const wildcardName = propertyAttrs['wildcardName'] ?? propertyName;
                 if (!namedWildcardNames.has(wildcardName) &&
                     !isWildcardNameContextual(wildcardName)) {
                     throw new Error(`To give '${propertyName}' a wildcard source, a wildcard with name '${wildcardName}' must exist in the pattern of version`);
